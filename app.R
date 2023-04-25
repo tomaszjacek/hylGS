@@ -9,7 +9,7 @@ ui <- bootstrapPage(
 server <- function(input, output) {
 
   result <- eventReactive(input$pull, {
-    system2("git", "pull origin master", stdout = TRUE, stderr = TRUE)
+    system2("git", "pull origin main", stdout = TRUE, stderr = TRUE)
   })
 
   output$user <- renderTable({
