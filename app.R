@@ -1,21 +1,34 @@
 library("shiny")
 
 ui <- bootstrapPage(
-  actionButton("pull", "Pull Master Branch"),
+
+
+  verbatimTextOutput("localTagVersion"),
+  selectInput(inputId = "mainWin_tagList",
+              label = "chose main branch version to download",
+              "Names"),
+  actionButton("pull", "download hylGS"),
   verbatimTextOutput("result"),
-  tableOutput("user")
 )
 
-server <- function(input, output) {
-
+server <- function(input, output, session) {
+  #list all tags in main branch on remote repository
+  tagList<-system2("git", "show-ref --tags", stdout = TRUE, stderr = TRUE)
+  #clean the strings like "4d722717d2579f02b2f9c311513d355e36774aef refs/tags/v0.0.0.1" "b06d7e1b9cdd4a88a00989ebec75181bef6c6043 refs/tags/v0.0.0.2"  to "v0.0.0.1" "v0.0.0.2" 
+  tagListClean <- sub("^.*/", "", tagList)
+  
+  updateSelectizeInput(session, "mainWin_tagList",choices = tagListClean)
+  
   result <- eventReactive(input$pull, {
     system2("git", "pull origin main", stdout = TRUE, stderr = TRUE)
   })
 
-  output$user <- renderTable({
-    info <- Sys.info()
-    data.frame(variable = names(info), values = unname(info))
-  })
+  output$localTagVersion <- renderText({paste0("local hylGS version: ",system2("git", "describe --tags", stdout = TRUE, stderr = TRUE))})
+  
+  #output$user <- renderTable({
+  #  info <- Sys.info()
+  #  data.frame(variable = names(info), values = unname(info))
+  #})
 
   output$result <- renderPrint({
     result()
