@@ -4,6 +4,8 @@ ui <- bootstrapPage(
 
 
   verbatimTextOutput("localTagVersion"),
+  verbatimTextOutput("localBranchList"),
+  verbatimTextOutput("remoteBranchList"),
   selectInput(inputId = "mainWin_tagList",
               label = "chose main branch version to download",
               "Names"),
@@ -25,6 +27,17 @@ server <- function(input, output, session) {
 
   output$localTagVersion <- renderText({paste0("local hylGS version: ",system2("git", "describe --tags", stdout = TRUE, stderr = TRUE))})
   
+  
+  remoteBranchList<-system2("git", "branch -r", stdout = TRUE, stderr = TRUE)
+  remoteBranchListClean <- unique(sub("^.*/", "", branchList))
+  output$remoteBranchList <- renderText(paste0("remote hylGS branches: ",paste(remoteBranchListClean, collapse=", ")))
+  
+  localBranchList<-system2("git", "branch -l", stdout = TRUE, stderr = TRUE)
+  localBranchListClean <- unique(sub("^.*/", "", branchList))
+  output$localBranchList <- renderText(paste0("local hylGS branches: ",paste(localBranchListClean, collapse=", ")))  
+  
+  
+  
   #output$user <- renderTable({
   #  info <- Sys.info()
   #  data.frame(variable = names(info), values = unname(info))
@@ -32,10 +45,11 @@ server <- function(input, output, session) {
 
   output$result <- renderPrint({
     result()
-  })
+  }) 
 
 }
 
+#git switch --detach v0.0.0.1
 
 shinyApp(ui, server)
 
