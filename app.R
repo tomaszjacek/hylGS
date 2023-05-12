@@ -1,81 +1,92 @@
-library("shiny")
+# Libs
+library(shiny)
+library(shinydashboard)
+#setwd("/media/hylGS/shinyLearningProjects/layoutAndModules/test4/")
+setwd("/home/vboxuser/hylGS/")
 
-ui <- bootstrapPage(
+# Source module
+source("modules/noDependencyModule/noDependencyModuleServer.R")
+source("modules/noDependencyModule/noDependencyModuleUi.R")
 
+source("modules/withDependencyModule/withDependencyModuleServer.R")
+source("modules/withDependencyModule/withDependencyModuleUi.R")
 
-  verbatimTextOutput("localTagVersion_string_mainPanel"),
-  verbatimTextOutput("localBranchList_string_mainPanel"),
-  verbatimTextOutput("remoteBranchList_string_mainPanel"),
-  
-  verbatimTextOutput("pullBranch_string_mainPanel"),
-  selectInput(inputId = "remoteBranches_list_mainPanel",
-              label = "chose remote branch to download",
-              "Names"),
-  actionButton("pull_button_mainPanel", "download hylGS"),
-  verbatimTextOutput("resultPull"),
-  
-  selectInput(inputId = "localBranchesTags_list_mainPanel",
-              label = "chose branch:tag version to switch",
-              "Names"),
-  actionButton("pull", "download hylGS"),
-  verbatimTextOutput("resultPull"),
-)
+source("modules/gitModule/gitModuleServer.R")
+source("modules/gitModule/gitModuleUi.R")
 
-server <- function(input, output, session) {
-  
-  #check hylGS's branches present in local repository
-  localBranchList<-system2("git", "branch -l", stdout = TRUE, stderr = TRUE)
-  localBranchListClean <- unique(sub("^.*/", "", localBranchList))
-  localBranchListClean <- sub("\\* ", "", localBranchListClean)
-  output$localBranchList_string <- renderText(paste0("local hylGS branches: ",paste(localBranchListClean, collapse=", ")))  
-  
-  
-  #check hylGS's branches present in remote repository (https://github.com/tomaszjacek/hylGS.git)
-  remoteBranchList<-system2("git", "branch -r", stdout = TRUE, stderr = TRUE)
-  remoteBranchListClean <- unique(sub("^.*/", "", remoteBranchList))
-  output$remoteBranchList_string <- renderText(paste0("remote hylGS branches: ",paste(remoteBranchListClean, collapse=", ")))
-  #update selection list on webpage
-  updateSelectizeInput(session, "remoteBranches_list_mainPanel",choices = remoteBranchListClean)
-  
-  
-  #list all tags in main branch on remote repository
-  tagList<-system2("git", "show-ref --tags", stdout = TRUE, stderr = TRUE)
-  #clean the strings like "4d722717d2579f02b2f9c311513d355e36774aef refs/tags/v0.0.0.1" "b06d7e1b9cdd4a88a00989ebec75181bef6c6043 refs/tags/v0.0.0.2"  to "v0.0.0.1" "v0.0.0.2" 
-  tagListClean <- sub("^.*/", "", tagList)
-  #update selection list on webpage
-  updateSelectizeInput(session, "localBranchesTags_list_mainPanel",choices = tagListClean)
-  
-  resultPull <- eventReactive(input$pull_button_mainPanel, {
-    system2("git", "pull origin main", stdout = TRUE, stderr = TRUE)
-  })
-
-  output$localTagVersion_string <- renderText({paste0("local hylGS version: ",system2("git", "describe --tags", stdout = TRUE, stderr = TRUE))})
-  
-  
-
-  
-
-  
-  localVsRemoteBranchesDiff <- localBranchList[!(localBranchList %in% remoteBranchList)]
-  
-  if(length(localVsRemoteBranchesDiff>0)){
-    output$ <- renderText(paste0("local hylGS branches: ",paste(localBranchListClean, collapse=", ")))
-  }
-  
-  #output$user <- renderTable({
-  #  info <- Sys.info()
-  #  data.frame(variable = names(info), values = unname(info))
-  #})
-
-  output$result <- renderPrint({
-    result()
-  }) 
-
+remove_shiny_inputs <- function(id, .input) {
+  invisible(
+    lapply(grep(id, names(.input), value = TRUE), function(i) {
+      .subset2(.input, "impl")$.values$remove(i)
+    })
+  )
 }
 
-#git switch --detach v0.0.0.1
+ui <- dashboardPage(
+  dashboardHeader(title = "Dynamic sidebar"),
+  #tags$style(type='text/css', '#txt_out {white-space: pre-wrap;}'),
+  dashboardSidebar(sidebarMenuOutput("menu")),
+  dashboardBody(tabItems(
+    tabItem(tabName = "tab_1", withDependencyModule_UI("module1")),
+    tabItem(tabName = "tab_2", noDependencyModule_UI("module2")),
+    tabItem(tabName = "tab_3", gitModule_UI("module3"))
+  ))
+)
+
+server <- function(input, output) {
+  active_modules <- reactiveVal(value = NULL)
+  
+  observeEvent(input$tabs,{
+    if(input$tabs=="tab_1"){
+      #callModule(sampleModuleServer, "module1")
+      noDependencyModule_Server(id = "module1")
+      active_modules(c("module1", active_modules()))
+    }
+  }, ignoreNULL = TRUE, ignoreInit = TRUE)
+  
+  
+  observeEvent(input$tabs,{
+    if(input$tabs=="tab_2"){
+      #callModule(sampleModuleServer, "sampleModule")
+      withDependencyModule_Server(id = "module2")
+      active_modules(c("module2", active_modules()))
+    }
+  }, ignoreNULL = TRUE, ignoreInit = TRUE)
+  
+  observeEvent(input$tabs,{
+    if(input$tabs=="tab_3"){
+      #callModule(sampleModuleServer, "sampleModule")
+      withDependencyModule_Server(id = "module3")
+      active_modules(c("module3", active_modules()))
+    }
+  }, ignoreNULL = TRUE, ignoreInit = TRUE)
+  
+  
+  
+  output$menu <- renderMenu({
+    sidebarMenu(id = "tabs",
+                menuItem(
+                  "genotypesUtils",
+                  icon = icon("calendar"),
+                  tabName = "tab_1"
+                ),
+                menuItem(
+                  "systemConfiguration",
+                  icon = icon("globe"),
+                  tabName = "tab_2"
+                ),
+                menuItem(
+                  "versionControl",
+                  icon = icon("globe"),
+                  tabName = "tab_3"
+                )
+    )
+  })
+}
 
 shinyApp(ui, server)
+
+
 
 #####################!!!!###############################
 
