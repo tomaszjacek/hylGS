@@ -14,6 +14,18 @@ source("modules/withDependencyModule/withDependencyModuleUi.R")
 source("modules/gitModule/gitModuleServer.R")
 source("modules/gitModule/gitModuleUi.R")
 
+source("modules/systemConfigurationModule/systemConfigurationModuleServer.R")
+source("modules/systemConfigurationModule/systemConfigurationModuleUi.R")
+
+source("modules/genotypesExportModule/genotypesExportModuleServer.R")
+source("modules/genotypesExportModule/genotypesExportModuleUi.R")
+
+source("modules/genotypesUtilsModule/genotypesUtilsModuleServer.R")
+source("modules/genotypesUtilsModule/genotypesUtilsModuleUi.R")
+
+source("modules/phenotypesExportModule/phenotypesExportModuleServer.R")
+source("modules/phenotypesExportModule/phenotypesExportModuleUi.R")
+
 remove_shiny_inputs <- function(id, .input) {
   invisible(
     lapply(grep(id, names(.input), value = TRUE), function(i) {
@@ -27,9 +39,11 @@ ui <- dashboardPage(
   #tags$style(type='text/css', '#txt_out {white-space: pre-wrap;}'),
   dashboardSidebar(sidebarMenuOutput("menu")),
   dashboardBody(tabItems(
-    tabItem(tabName = "tab_1", withDependencyModule_UI("module1")),
-    tabItem(tabName = "tab_2", noDependencyModule_UI("module2")),
-    tabItem(tabName = "tab_3", gitModule_UI("module3"))
+    tabItem(tabName = "tab_phenotypesExport", noDependencyModule_UI("phenotypesExport")),
+    tabItem(tabName = "tab_genotypesUtils", withDependencyModule_UI("genotypesUtils")),
+    tabItem(tabName = "tab_genotypesExport", withDependencyModule_UI("genotypesExport")),
+    tabItem(tabName = "tab_git", gitModule_UI("git")),
+    tabItem(tabName = "tab_systemConfiguration", systemConfigurationModule_UI("systemConfiguration"))
   ))
 )
 
@@ -37,48 +51,71 @@ server <- function(input, output) {
   active_modules <- reactiveVal(value = NULL)
   
   observeEvent(input$tabs,{
-    if(input$tabs=="tab_1"){
-      #callModule(sampleModuleServer, "module1")
-      noDependencyModule_Server(id = "module1")
-      active_modules(c("module1", active_modules()))
+    if(input$tabs=="tab_phenotypesExport"){
+      noDependencyModule_Server(id = "phenotypesExport")
+      active_modules(c("phenotypesExport", active_modules()))
     }
   }, ignoreNULL = TRUE, ignoreInit = TRUE)
   
   
   observeEvent(input$tabs,{
-    if(input$tabs=="tab_2"){
-      #callModule(sampleModuleServer, "sampleModule")
-      withDependencyModule_Server(id = "module2")
-      active_modules(c("module2", active_modules()))
+    if(input$tabs=="tab_genotypesUtils"){
+      withDependencyModule_Server(id = "genotypesUtils")
+      active_modules(c("genotypesUtils", active_modules()))
+    }
+  }, ignoreNULL = TRUE, ignoreInit = TRUE)
+  
+  
+  observeEvent(input$tabs,{
+    if(input$tabs=="tab_genotypesExport"){
+      noDependencyModule_Server(id = "genotypesExport")
+      active_modules(c("genotypesExport", active_modules()))
+    }
+  }, ignoreNULL = TRUE, ignoreInit = TRUE)
+  
+  
+  
+  observeEvent(input$tabs,{
+    if(input$tabs=="tab_git"){
+      withDependencyModule_Server(id = "git")
+      active_modules(c("git", active_modules()))
     }
   }, ignoreNULL = TRUE, ignoreInit = TRUE)
   
   observeEvent(input$tabs,{
-    if(input$tabs=="tab_3"){
-      #callModule(sampleModuleServer, "sampleModule")
-      withDependencyModule_Server(id = "module3")
-      active_modules(c("module3", active_modules()))
+    if(input$tabs=="tab_systemConfiguration"){
+      withDependencyModule_Server(id = "systeConfiguration")
+      active_modules(c("systemConfiguration", active_modules()))
     }
   }, ignoreNULL = TRUE, ignoreInit = TRUE)
-  
   
   
   output$menu <- renderMenu({
     sidebarMenu(id = "tabs",
                 menuItem(
+                  "phenotypesExport",
+                  icon = icon("calendar"),
+                  tabName = "tab_phenotypesExport"
+                ),
+                menuItem(
                   "genotypesUtils",
                   icon = icon("calendar"),
-                  tabName = "tab_1"
+                  tabName = "tab_genotypesUtils"
+                ),
+                menuItem(
+                  "genotypesExport",
+                  icon = icon("calendar"),
+                  tabName = "tab_genotypesExport"
                 ),
                 menuItem(
                   "systemConfiguration",
                   icon = icon("globe"),
-                  tabName = "tab_2"
+                  tabName = "tab_systemConfiguration"
                 ),
                 menuItem(
                   "versionControl",
                   icon = icon("globe"),
-                  tabName = "tab_3"
+                  tabName = "tab_git"
                 )
     )
   })
