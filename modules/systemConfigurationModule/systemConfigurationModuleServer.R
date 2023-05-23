@@ -1,30 +1,60 @@
-systemConfigurationModule_Server <- function(id) {
+systemConfigurationModule_Server <- function(id, dat) {
   moduleServer(
     id,
     function(input,output,session){
-      #output$plot1 <- renderPlot({
-      #  plot(mtcars)
-      #})
-      pwd<-getwd()
-      output$pullBranch_string_mainPanel<-renderText(pwd)
       
-      remoteBranchListClean<-c("hello","aloha")
-      updateSelectizeInput(session, "remoteBranches_list_mainPanel",choices = remoteBranchListClean)
-      #output$remoteBranchList_string <- renderText(paste0("remote hylGS branches: ",paste(remoteBranchListClean, collapse=", ")))
+      returnLastAfterSplit<-function(tmpString) {
+        tmp<-strsplit(tmpString, "_", fixed=TRUE)
+        return(tail(tmp[[1]],1))
+      }
       
-      lsResult<-system2("ls", "-al", stdout = TRUE, stderr = TRUE)
-      lsResult<- paste0("<div class=\"white-space-pre-line\" style=\"background: green\">", lsResult,"</div>")
-      #output$resultPull<-renderText(lsResult)
-      
-      
-      
-      # observe({
-      #   if (input$refreshTab1_id) {
-      #     session$reload()
-      #   }
-      # })
-      output$resultPull <- eventReactive(input$pull_button_mainPanel,
-        system2("ls", "-al", stdout = TRUE, stderr = TRUE)
+      saveSettings <- function(settings,savePath) {
+          tryCatch(
+            {
+              write_json(settings, savePath)
+              return(TRUE)
+            },
+            error = function(e) {
+              return(FALSE)
+            }
+          )
+      }
+      #print(globalData$hylGsSettings)
+      # Update form fields based on loaded settings
+      output$formFields <- renderUI({
+        
+        settingsData<-dat()
+        #settingsData <- dat$GetStash$hylGsSettings()
+        #settingsFileName <- dat$GetStash$hylGsSettingsFileName()
+        #print("----------------------------")
+        #print(globalData)
+        #print("----------------------------")
+
+        settingsData<-dat()
+        if (is.null(settingsData))
+          return(NULL)
+        
+        fields <- lapply(names(settingsData), function(var_name) {
+          if (returnLastAfterSplit(var_name)=="numeric") {
+            numericInput(var_name, var_name, value = settingsData[[var_name]])
+          } else if (returnLastAfterSplit(var_name)=="text") {
+            textInput(var_name, var_name, value = settingsData[[var_name]])
+          } else if(returnLastAfterSplit(var_name)=="textSelect"){
+            # Handle other input types as needed (e.g., selectInput, checkboxInput)
+            textInput(var_name, var_name, value = settingsData[[var_name]])
+          } else if(returnLastAfterSplit(var_name)=="numericSelect"){
+            # Handle other input types as needed (e.g., selectInput, checkboxInput)
+            textInput(var_name, var_name, value = settingsData[[var_name]])
+          }else{
+            renderText("unknown Variable Type")
+          }
+          
+        })
+        
+        do.call(tagList, fields)
+      })
+      output$resultPull <- eventReactive(input$saveGsSettings_button,
+        saveSettings(settingsData,settingsFileName)
       )
 
       #output$localTagVersion_string <- renderText({paste0("local hylGS version: ",system2("ls", "-al", stdout = TRUE, stderr = TRUE))})
@@ -33,4 +63,25 @@ systemConfigurationModule_Server <- function(id) {
     }
   )
 }
+
+
+#--------------------------------------------
+# lapply(names(settingsData), function(var_name) {
+#   if (returnLastAfterSplit(var_name)=="numeric") {
+#     print(paste0("numeric ",var_name," ",settingsData[[var_name]]))
+#   } else if (returnLastAfterSplit(var_name)=="text") {
+#     print(paste0("text ",var_name," ",settingsData[[var_name]]))
+#   } else if(returnLastAfterSplit(var_name)=="textSelect"){
+#     print(paste0("textSelect ",var_name," ",settingsData[[var_name]]))
+#   } else if(returnLastAfterSplit(var_name)=="numericSelect"){
+#     print(paste0("numericSelect ",var_name," ",settingsData[[var_name]]))
+#   }else{
+#     print("unknown Variable Type")
+#   }
+#   
+# })
+# 
+# lapply(names(settingsData), function(var_name) {
+#   print(paste0("varName ",var_name))
+# })
 

@@ -1,6 +1,7 @@
 # Libs
 library(shiny)
 library(shinydashboard)
+library(jsonlite)
 #setwd("/media/hylGS/shinyLearningProjects/layoutAndModules/test4/")
 setwd("/home/vboxuser/hylGS/")
 
@@ -26,6 +27,11 @@ source("modules/genotypesUtilsModule/genotypesUtilsModuleUi.R")
 source("modules/phenotypesExportModule/phenotypesExportModuleServer.R")
 source("modules/phenotypesExportModule/phenotypesExportModuleUi.R")
 
+source("modules/globalVariablesModule.R")
+
+hylGsSettingsFileName <- "hylGsSettings.json"
+
+#funkcja do usowania zmiennych dynamicznei ladowanych modulow. chyba...
 remove_shiny_inputs <- function(id, .input) {
   invisible(
     lapply(grep(id, names(.input), value = TRUE), function(i) {
@@ -39,20 +45,39 @@ ui <- dashboardPage(
   #tags$style(type='text/css', '#txt_out {white-space: pre-wrap;}'),
   dashboardSidebar(sidebarMenuOutput("menu")),
   dashboardBody(tabItems(
-    tabItem(tabName = "tab_phenotypesExport", noDependencyModule_UI("phenotypesExport")),
-    tabItem(tabName = "tab_genotypesUtils", withDependencyModule_UI("genotypesUtils")),
-    tabItem(tabName = "tab_genotypesExport", withDependencyModule_UI("genotypesExport")),
+    tabItem(tabName = "tab_phenotypesExport", phenotypesExportModule_UI("phenotypesExport")),
+    tabItem(tabName = "tab_genotypesUtils", genotypesUtilsModule_UI("genotypesUtils")),
+    tabItem(tabName = "tab_genotypesExport", genotypesExportModule_UI("genotypesExport")),
     tabItem(tabName = "tab_git", gitModule_UI("git")),
     tabItem(tabName = "tab_systemConfiguration", systemConfigurationModule_UI("systemConfiguration"))
   ))
 )
 
 server <- function(input, output) {
+  # Function to load settings from file
+
+  
   active_modules <- reactiveVal(value = NULL)
+  #globalData <- reactiveValues( hylGsSettingsFileName = "hylGsSettings.json", hylGsSettings=NULL)
+  globalData <- callModule(globalVariablesModule, "globals")
+  
+   # reactive({
+   #   print(globalData)
+   # })
+   # 
+  # 
+  # reactive({
+  #   globalData$hylGsSettings <- loadSystemSettings(globalData$hylGsSettingsFileName)
+  #   #print(globalData$hylGsSettings)
+  # })
+
+  #print(globalData$hylGsSettingsFileName)
+  #print(globalData)
+  
   
   observeEvent(input$tabs,{
     if(input$tabs=="tab_phenotypesExport"){
-      noDependencyModule_Server(id = "phenotypesExport")
+      phenotypesExportModule_Server(id = "phenotypesExport")
       active_modules(c("phenotypesExport", active_modules()))
     }
   }, ignoreNULL = TRUE, ignoreInit = TRUE)
@@ -60,7 +85,7 @@ server <- function(input, output) {
   
   observeEvent(input$tabs,{
     if(input$tabs=="tab_genotypesUtils"){
-      withDependencyModule_Server(id = "genotypesUtils")
+      genotypesUtilsModule_Server(id = "genotypesUtils")
       active_modules(c("genotypesUtils", active_modules()))
     }
   }, ignoreNULL = TRUE, ignoreInit = TRUE)
@@ -68,23 +93,22 @@ server <- function(input, output) {
   
   observeEvent(input$tabs,{
     if(input$tabs=="tab_genotypesExport"){
-      noDependencyModule_Server(id = "genotypesExport")
+      genotypesExportModule_Server(id = "genotypesExport")
       active_modules(c("genotypesExport", active_modules()))
     }
   }, ignoreNULL = TRUE, ignoreInit = TRUE)
   
   
-  
   observeEvent(input$tabs,{
     if(input$tabs=="tab_git"){
-      withDependencyModule_Server(id = "git")
+      gitModule_Server(id = "git",globalData)
       active_modules(c("git", active_modules()))
     }
   }, ignoreNULL = TRUE, ignoreInit = TRUE)
   
   observeEvent(input$tabs,{
     if(input$tabs=="tab_systemConfiguration"){
-      withDependencyModule_Server(id = "systeConfiguration")
+      systemConfigurationModule_Server(id = "systemConfiguration",dat=globalData)
       active_modules(c("systemConfiguration", active_modules()))
     }
   }, ignoreNULL = TRUE, ignoreInit = TRUE)

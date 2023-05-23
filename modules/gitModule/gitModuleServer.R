@@ -1,4 +1,4 @@
-gitModule_Server <- function(id) {
+gitModule_Server <- function(id,globalData) {
   moduleServer(
     id,
     function(input,output,session){
