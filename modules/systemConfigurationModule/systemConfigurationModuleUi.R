@@ -11,7 +11,8 @@ systemConfigurationModule_UI <- function(id) {
     #actionButton(ns("pull_button_mainPanel"), "download hylGS"),
     #htmlOutput(ns("resultPull"))
     uiOutput(ns("formFields")),
-    actionButton(ns("saveGsSettings_button"), "save system settings"),    verbatimTextOutput(ns("resultPull")),
+    actionButton(ns("saveGsSettings_button"), "save system settings"),
+    tableOutput(ns("resultSaveSettings")),
     tableOutput(ns("settingsTable"))
     
     

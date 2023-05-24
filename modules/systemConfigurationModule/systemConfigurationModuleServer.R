@@ -15,6 +15,7 @@ systemConfigurationModule_Server <- function(id, dat) {
               return(TRUE)
             },
             error = function(e) {
+              print(e)
               return(FALSE)
             }
           )
@@ -53,10 +54,16 @@ systemConfigurationModule_Server <- function(id, dat) {
         
         do.call(tagList, fields)
       })
-      output$resultPull <- eventReactive(input$saveGsSettings_button,
-        saveSettings(settingsData,"hylGsSettings.json")
-      )
 
+      out <- reactiveValues()
+      # out$data <- eventReactive(input$saveGsSettings_button,
+      #   saveSettings(settingsData,"hylGsSettings_new.json")
+      # )
+      observeEvent(input$saveGsSettings_button,{
+          out$data<-saveSettings(settingsData,"hylGsSettings_new.json")
+      })
+      output$resultSaveSettings <-renderTable({ out$data })
+      
       #output$localTagVersion_string <- renderText({paste0("local hylGS version: ",system2("ls", "-al", stdout = TRUE, stderr = TRUE))})
       
       
