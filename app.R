@@ -6,26 +6,33 @@ library(jsonlite)
 setwd("/home/vboxuser/hylGS/")
 
 # Source module
-source("modules/noDependencyModule/noDependencyModuleServer.R")
 source("modules/noDependencyModule/noDependencyModuleUi.R")
+source("modules/noDependencyModule/noDependencyModuleServer.R")
 
-source("modules/withDependencyModule/withDependencyModuleServer.R")
+
 source("modules/withDependencyModule/withDependencyModuleUi.R")
+source("modules/withDependencyModule/withDependencyModuleServer.R")
 
-source("modules/gitModule/gitModuleServer.R")
+
 source("modules/gitModule/gitModuleUi.R")
+source("modules/gitModule/gitModuleServer.R")
 
-source("modules/systemConfigurationModule/systemConfigurationModuleServer.R")
+
 source("modules/systemConfigurationModule/systemConfigurationModuleUi.R")
+source("modules/systemConfigurationModule/systemConfigurationModuleServer.R")
 
-source("modules/genotypesExportModule/genotypesExportModuleServer.R")
+
 source("modules/genotypesExportModule/genotypesExportModuleUi.R")
+source("modules/genotypesExportModule/genotypesExportModuleServer.R")
 
-source("modules/genotypesUtilsModule/genotypesUtilsModuleServer.R")
+
 source("modules/genotypesUtilsModule/genotypesUtilsModuleUi.R")
+source("modules/genotypesUtilsModule/genotypesUtilsModuleServer.R")
 
-source("modules/phenotypesExportModule/phenotypesExportModuleServer.R")
+
 source("modules/phenotypesExportModule/phenotypesExportModuleUi.R")
+source("modules/phenotypesExportModule/phenotypesExportModuleServer.R")
+
 
 source("modules/globalVariablesModule.R")
 
@@ -145,7 +152,7 @@ server <- function(input, output) {
   })
 }
 
-shinyApp(ui, server)
+shinyApp(ui, server, options = list(display.mode = "showcase"))
 
 
 

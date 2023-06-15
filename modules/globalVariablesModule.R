@@ -18,7 +18,7 @@ loadSystemSettings <- function(filepath) {
 globalVariablesModule <- function(input, output, session) {
   
   #globalData$hylGsSettingsFileName <- "hylGsSettings.json"
-  globalData <- loadSystemSettings("hylGsSettings.json")
+  globalData <- loadSystemSettings("hylGsSettings_new.json")
   #print(globalData)
   #globalData <- reactiveValues( hylGsSettingsFileName = "hylGsSettings.json", hylGsSettings=NULL)
   #globalData <- reactive(loadSystemSettings("hylGsSettings.json"))

@@ -22,16 +22,18 @@ systemConfigurationModule_Server <- function(id, dat) {
       }
       #print(globalData$hylGsSettings)
       # Update form fields based on loaded settings
+      settingsData<-dat()
+      
       output$formFields <- renderUI({
         
-        settingsData<-dat()
+        #settingsData<-dat()
         #settingsData <- dat$GetStash$hylGsSettings()
         #settingsFileName <- dat$GetStash$hylGsSettingsFileName()
         # print("----------------------------")
         # print(settingsData)
         # print("----------------------------")
 
-        settingsData<-dat()
+
         if (is.null(settingsData))
           return(NULL)
         

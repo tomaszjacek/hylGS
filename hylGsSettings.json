@@ -1,6 +1,8 @@
 {
   "Name_text":"tom",
-  "Age_numeric":5,
+  "Age_integer":5,
+  "Prob_numeric":0.5476,
   "Gender_textSelect":["Female","Male"],
+  "HornsLength_numericSelect":[36.7,41.4],
   "githubPublicRepo_text":"https://github.com/tomaszjacek/hylGS.git"
 }
