@@ -1,6 +1,8 @@
 # Libs
 library(shiny)
 library(shinydashboard)
+library(shinyWidgets)
+library(shinyjs)
 library(jsonlite)
 #setwd("/media/hylGS/shinyLearningProjects/layoutAndModules/test4/")
 setwd("/home/vboxuser/hylGS/")
@@ -80,8 +82,7 @@ server <- function(input, output) {
 
   #print(globalData$hylGsSettingsFileName)
   #print(globalData)
-  
-  
+
   observeEvent(input$tabs,{
     if(input$tabs=="tab_phenotypesExport"){
       phenotypesExportModule_Server(id = "phenotypesExport")

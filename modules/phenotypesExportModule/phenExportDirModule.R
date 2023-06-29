@@ -19,7 +19,7 @@ phenExportDirModule_UI <- function(id) {
 
 phenExportDirModule <- function(input,output,session,dirToProcess=NULL){
   
-  print(paste0("dirToProcess",dirToProcess))
+  #print(paste0("dirToProcess",dirToProcess))
   
   output$phenExportDirMetadataSummary <- renderUI(
     tags$div(

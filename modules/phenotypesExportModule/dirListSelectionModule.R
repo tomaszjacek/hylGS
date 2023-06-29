@@ -30,7 +30,7 @@ dirListSelectionModule <- function(input, output, session, dir=NULL) {
   # (Re)load button
   observeEvent(input$AB_load, {
     toReturn$dirSelected       <- dir
-    print(paste0("dir:",toReturn$dirSelected))
+    #print(paste0("dir:",toReturn$dirSelected))
   })
   
   return(toReturn)

@@ -51,7 +51,7 @@ phenotypesExportModule_Server <- function(id) {
           
         }
       
-      {         ns <- session$ns
+      {         
         
 
           lapply(rv$selectedButton, function(i) { 
@@ -62,11 +62,26 @@ phenotypesExportModule_Server <- function(id) {
         })
         }
       
-      #{
+      
+      
+
+
+            
+      
         # Call module show_data
-       # callModule(module = phenExportDirModule, id = "mod4",
-        #           variable = reactive(rv$variable))
-      #}
+        output$phen_qc_layout_builder<-renderUI({
+          ns <- session$ns
+          phenQcLayoutBuilderModule_UI(ns("phenQcBuilder"))
+        })
+      
+        # observeEvent(input$tabsetPanelID,{
+        #   if(input$tabsetPanelID=="phenQcBuilder"){
+             phenQcLayoutBuilderModule_Server(id = "phenQcBuilder")
+        #   print("alloha")
+        #   }
+        # }, ignoreNULL = TRUE, ignoreInit = TRUE)
+        
+
       
     }
   )
