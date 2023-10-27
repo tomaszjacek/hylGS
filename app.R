@@ -5,7 +5,7 @@ library(shinyWidgets)
 #library(shinyjs)
 library(jsonlite)
 #setwd("/media/hylGS/shinyLearningProjects/layoutAndModules/test4/")
-setwd("/media/hylGS/shinyTests/hylGS_vWithModulesAsObjectsR6/")
+setwd("/home/vboxuser/hylGS/")
 
 
 

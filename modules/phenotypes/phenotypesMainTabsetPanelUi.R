@@ -1,7 +1,7 @@
-source("/media/hylGS/shinyTests/hylGS_vWithModulesAsObjectsR6/modules/phenotypes/phenExportDirModule.R")
-source("/media/hylGS/shinyTests/hylGS_vWithModulesAsObjectsR6/modules/phenotypes/dirListSelectionModule.R")
-#source("/media/hylGS/shinyTests/hylGS_vWithModulesAsObjectsR6/modules/phenotypes/qcThresholdsBuilder.R")
-source("/media/hylGS/shinyTests/hylGS_vWithModulesAsObjectsR6/modules/phenotypes/phenotypesQcChartsBuilder.R")
+source("/home/vboxuser/hylGS/modules/phenotypes/phenExportDirModule.R")
+source("/home/vboxuser/hylGS/modules/phenotypes/dirListSelectionModule.R")
+#source("/home/vboxuser/hylGS/modules/phenotypes/qcThresholdsBuilder.R")
+source("/home/vboxuser/hylGS/modules/phenotypes/phenotypesQcChartsBuilder.R")
 
 phenotypesMainTabsetPanel_ui <- function(id) {
   ns <- NS(id)
