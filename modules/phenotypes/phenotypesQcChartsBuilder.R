@@ -14,10 +14,10 @@ qcWidgetsTypes <- c("chartIMG", "tableHTML")
 chartObject <- R6::R6Class(
   classname = "chartObject",
   public = list(
-    triggers = reactiveValues(plot = 0),
-    trigger_plot = function() {
-      self$triggers$plot <- self$triggers$plot + 1
-    },
+    #triggers = reactiveValues(plot = 0),
+    #trigger_plot = function() {
+    #  self$triggers$plot <- self$triggers$plot + 1
+    #},
     idName = NULL,
     selected_value = NULL,
     traitName = NULL,
@@ -43,21 +43,23 @@ traitObject <- R6::R6Class(
     htmlSkin = "",
     traitName = "",
     add_chartObject = function(chObject) {
-      print(paste0("add_qcObject R6 of",traitName))
+      
       chIdName <- chObject$idName
       trait <- chObject$traitName
-      if(is.null(chIdname) | chIdName == ""){
+      print(paste0("add_qcObject R6 of",trait," | ",chIdName))
+      if(is.null(chIdName) | chIdName == ""){
       }else{
         self$chartsObjectsList[[chIdName]] <- chObject
       }
+      print(paste0("add_qcObject R6 names ",names(self$chartsObjectsList)))
     },
     rm_chartObject = function(qcObjectId) {
       self$chartsObjectsList[[qcObjectId]] <- NULL
     },
     get_charts_names = function() {
       
-      if(!is_empty(names(self$hartsObjectsList))){
-        return(names(self$hartsObjectsList))
+      if(!is_empty(names(self$chartsObjectsList))){
+        return(names(self$chartsObjectsList))
       }else{
         return(NULL)
         
@@ -71,12 +73,7 @@ chartsObjectsManager <- R6::R6Class(
   public = list(
     traitsObjectsList = list(),
 
-    get_traitObject=function(tName){
-      print(paste0("get_traitObject ",tName))
-      if(self$traitsObjectsList[[tName]]){
-        return(self$traitsObjectsList[[tName]])
-      }else{return(NULL)}
-    },
+
     add_trait = function(tObject) {
       traitName <- tObject$traitName
       self$traitsObjectsList[[traitName]] <- tObject
@@ -101,10 +98,20 @@ chartsObjectsManager <- R6::R6Class(
       }
     },
     get_trait_chartsObjectsNames= function(traitName) {
-      if(length(self$traitsObjectsList[[traitName]]$get_charts_names())){
-        return(names(self$traitsObjectsList[[traitName]]$get_charts_names()))
+      tmp <- self$traitsObjectsList[[traitName]]
+      chartsNamesList <- tmp$get_charts_names()
+      if(length(chartsNamesList)){print(paste0("get_trait_chartsObjectsNames: ",chartsNamesList))
+        return(chartsNamesList)
       }else{
         return(NULL)
+      }
+    },
+    add_chartObject_toTrait= function(tName,ob) {
+      if(tName %in% names(self$traitsObjectsList)){
+        self$traitsObjectsList[[tName]]$add_chartObject(ob)
+      }else{
+        return(NULL)
+        
       }
     }
   )
@@ -192,8 +199,8 @@ traitTab_ui <- function(id) {
 }
 
 
-scatter_char_objects <- function(chartsList, chartSelected,nsId ){
-  print(paste0("scatter_char_objects_sart: ",chartsList))
+scatter_chart_objects <- function(chartsList, chartSelected,nsId ){
+  print(paste0("scatter_chart_objects_sart: ",chartsList))
   
   tp<-NULL
   if(length(chartsList)>0){
@@ -202,7 +209,7 @@ scatter_char_objects <- function(chartsList, chartSelected,nsId ){
         tabPanel(chartsList[i], chartForm_ui(nsId(chartsList[i]),chartsList[i]))
       }),selected = chartSelected))
   }
-  print(paste0("scatter_char_objects_end: ",chartsList))
+  print(paste0("scatter_chart_objects_end: ",chartsList))
   return(tp)
 }
 
@@ -222,19 +229,16 @@ traitTab_server <- function(id, varManager) {
     
     
     output$chartsTabsetpanel <- renderUI({
-    
       if(length(traitQcObjectsList) >0){ 
-      
-        scatter_char_objects(traitQcObjectsList,traitQcObjectsList[1], ns)
-      
-        for(o in 1:length(traitQcObjectsList)){
-          name <- traitQcObjectsList[o]
-      
-          qcObjectsServers[[name]] <- chartForm_server(name,traitName,varManager)
-        #appendTab("qcFormsMainPanel", tabPanel(name, chartForm_ui(ns(name),name)), select = TRUE)
-        }
+        scatter_chart_objects(traitQcObjectsList,traitQcObjectsList[1], ns)
       }
     })
+    for(o in 1:length(traitQcObjectsList)){
+      name <- traitQcObjectsList[o]
+      
+      qcObjectsServers[[name]] <- chartForm_server(name,traitName,varManager)
+      #appendTab("qcFormsMainPanel", tabPanel(name, chartForm_ui(ns(name),name)), select = TRUE)
+    }
     
     print(paste0("varManager$get_traits_names() :",varManager$get_traits_names()))
     observeEvent(input$addQcObject, {
@@ -243,24 +247,27 @@ traitTab_server <- function(id, varManager) {
       
       
       #print("0.1")
-      #if(input$qcObjName == "" | is.null(input$qcObjName)){
+      if(input$qcObjName == "" | is.null(input$qcObjName)){
         #newObj$set_variables("","","","","","")
-      #}
+      }else{
         newName<-input$qcObjName
         print("addQcObject inelse0")
         newObj <- chartObject$new()
         print("addQcObject inelse1")
         newObj$set_variables(newName,"",traitName,"","","")
         print(paste0("addQcObject inelse2 ::",traitName))
-        varManager$get_traitObject(traitName)$add_chartObject(newObj)
-        
+        varManager$add_chartObject_toTrait(traitName,newObj)
+
         newtraitQcObjectsList<-varManager$get_trait_chartsObjectsNames(traitName)
-        scatter_char_objects(newtraitQcObjectsList,newName, ns)
+        print(paste0("varManager$get_trait_chartsObjectsNames(traitName)!!!!!!!!!!!!! :",varManager$get_trait_chartsObjectsNames(traitName)))
+        output$chartsTabsetpanel <- renderUI({
+          scatter_chart_objects(newtraitQcObjectsList,newName, ns)
+        })
         print("addQcObject inelse3")
         qcObjectsServers[[newName]] <- chartForm_server(newName,traitName,varManager)
         #print("addQcObject inelse4")
         #appendTab("qcFormsMainPanel", tabPanel(newName, chartForm_ui(ns(newName),newName)), select = TRUE)
-      
+      }
     })
     
     print("traitTab_server:END")
@@ -365,10 +372,10 @@ phenotypesQcChartsBuilder_server <- function(id) {
       "configuration saved"
     )
     
-    loadConfiguration <- reactiveVal(0)
+    #loadConfiguration <- reactiveVal(0)
     activeTraitTab<-NULL
     traitsServers <- list()
-    objCount <- reactiveVal(0)
+    #objCount <- reactiveVal(0)
     #traitFormServersCollection<- reactiveValues(objects = list())
     variablesManager <- NULL
     
