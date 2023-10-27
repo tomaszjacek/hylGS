@@ -227,19 +227,15 @@ traitTab_server <- function(id, varManager) {
     traitQcObjectsList <- varManager$get_trait_chartsObjectsNames(id)
     print(paste0(" varManager$get_trait_chartsObjectsNames(id) :",traitQcObjectsList))
     
-    
-    output$chartsTabsetpanel <- renderUI({
-      if(length(traitQcObjectsList) >0){ 
+    if(length(traitQcObjectsList) >0){ 
+      output$chartsTabsetpanel <- renderUI({
         scatter_chart_objects(traitQcObjectsList,traitQcObjectsList[1], ns)
+      })
+      for(o in 1:length(traitQcObjectsList)){
+        name <- traitQcObjectsList[o]
+        qcObjectsServers[[name]] <- chartForm_server(name,traitName,varManager)
       }
-    })
-    for(o in 1:length(traitQcObjectsList)){
-      name <- traitQcObjectsList[o]
-      
-      qcObjectsServers[[name]] <- chartForm_server(name,traitName,varManager)
-      #appendTab("qcFormsMainPanel", tabPanel(name, chartForm_ui(ns(name),name)), select = TRUE)
     }
-    
     print(paste0("varManager$get_traits_names() :",varManager$get_traits_names()))
     observeEvent(input$addQcObject, {
       #print("addQcObject")
@@ -468,7 +464,7 @@ phenotypesQcChartsBuilder_server <- function(id) {
         #updateSelectInput(session, "objSelection", choices = traitsList,selected =newTraitName)
         #appendTab("objTP", tabPanel(newTraitName, traitTab_ui(ns(newTraitName))), select = TRUE)
         output$mainTabsetpanel <- renderUI({
-          print(paste0("renderUI_1: ",variablesManager$triggers$plot))
+          #print(paste0("renderUI_1: ",variablesManager$triggers$plot))
           scatter_tabset(variablesManager$get_traits_names(),newTraitName, ns)
         })
         output$mainSelection <- renderUI({
